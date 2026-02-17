@@ -15,6 +15,74 @@ interface WindowDiagramProps {
   alas: number;
 }
 
+/** Horizontal dimension line with end caps and centered label */
+function HDim({
+  width,
+  label,
+  sublabel,
+  lineColor,
+  textColor,
+  bgColor,
+  style,
+  opacity = 1,
+}: {
+  width: number;
+  label: string;
+  sublabel?: string;
+  lineColor: string;
+  textColor: string;
+  bgColor: string;
+  style?: object;
+  opacity?: number;
+}) {
+  return (
+    <View style={[styles.hDim, { width }, style]}>
+      <View style={[styles.hLine, { backgroundColor: lineColor, opacity }]} />
+      <View style={[styles.hCap, styles.hCapL, { backgroundColor: lineColor, opacity }]} />
+      <View style={[styles.hCap, styles.hCapR, { backgroundColor: lineColor, opacity }]} />
+      <View style={[styles.hLabel, { backgroundColor: bgColor }]}>
+        <Text style={[styles.dimText, { color: textColor, opacity }]}>{label}</Text>
+        {sublabel && (
+          <Text style={[styles.dimSub, { color: textColor, opacity: opacity * 0.8 }]}>
+            {sublabel}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+/** Vertical dimension line with end caps and centered label */
+function VDim({
+  height,
+  lines,
+  lineColor,
+  textColor,
+  bgColor,
+}: {
+  height: number;
+  lines: { label: string; value: string }[];
+  lineColor: string;
+  textColor: string;
+  bgColor: string;
+}) {
+  return (
+    <View style={[styles.vDim, { height }]}>
+      <View style={[styles.vLine, { backgroundColor: lineColor }]} />
+      <View style={[styles.vCap, styles.vCapT, { backgroundColor: lineColor }]} />
+      <View style={[styles.vCap, styles.vCapB, { backgroundColor: lineColor }]} />
+      <View style={[styles.vLabel, { backgroundColor: bgColor }]}>
+        {lines.map((l, i) => (
+          <View key={i} style={i > 0 ? styles.vLabelGap : undefined}>
+            <Text style={[styles.dimSub, { color: textColor }]}>{l.label}</Text>
+            <Text style={[styles.dimText, { color: textColor }]}>{l.value}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export function WindowDiagram({
   results,
   windowWidth,
@@ -24,7 +92,7 @@ export function WindowDiagram({
   const { colors, isDark } = useTheme();
   const screen = useWindowDimensions();
 
-  // -- Zoom / pan state --
+  // -- Zoom / pan --
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -72,25 +140,26 @@ export function WindowDiagram({
     ],
   }));
 
-  // -- Drawing dimensions --
-  const sideMargin = 50;
-  const maxDrawWidth = screen.width - 40 - sideMargin * 2;
-  const maxDrawHeight = 260;
+  // -- Drawing proportions --
+  const dimColW = 40;
+  const sideCols = 3; // left: jamba | right: eng+trasl, alto
+  const sideSpace = dimColW * sideCols;
+  const maxDrawW = screen.width - 40 - sideSpace;
+  const maxDrawH = 280;
 
   const ratio = windowWidth / windowHeight;
   let drawW: number;
   let drawH: number;
-  if (ratio > maxDrawWidth / maxDrawHeight) {
-    drawW = maxDrawWidth;
-    drawH = maxDrawWidth / ratio;
+  if (ratio > maxDrawW / maxDrawH) {
+    drawW = maxDrawW;
+    drawH = maxDrawW / ratio;
   } else {
-    drawH = maxDrawHeight;
-    drawW = maxDrawHeight * ratio;
+    drawH = maxDrawH;
+    drawW = maxDrawH * ratio;
   }
 
-  const frame = Math.max(drawW * 0.045, 4);
-  const innerW = drawW - frame * 2;
-  const innerH = drawH - frame * 2;
+  const framePx = Math.max(drawW * 0.04, 4);
+  const innerW = drawW - framePx * 2;
   const gap = 2;
   const panelW = (innerW - gap * (alas - 1)) / alas;
 
@@ -98,6 +167,7 @@ export function WindowDiagram({
   const dimColor = colors.tint;
   const frameColor = colors.text;
   const glassColor = isDark ? '#23282c' : '#e8f0f8';
+  const labelBg = colors.surface;
 
   return (
     <View
@@ -117,41 +187,34 @@ export function WindowDiagram({
         <GestureDetector gesture={composed}>
           <Animated.View style={[styles.zoomLayer, animatedStyle]}>
             <View style={styles.diagram}>
-              {/* ---- Top dimension: Cabezal ---- */}
-              <View style={[styles.hDim, { width: drawW }]}>  
-                <View style={[styles.hDimLine, { backgroundColor: lineColor }]} />
-                <View style={[styles.hDimCap, styles.hDimCapLeft, { backgroundColor: lineColor }]} />
-                <View style={[styles.hDimCap, styles.hDimCapRight, { backgroundColor: lineColor }]} />
-                <View style={styles.hDimLabel}>
-                  <Text style={[styles.dimText, { color: dimColor }]}>
-                    Cabezal: {formatMeasure(results.cabezal)} cm
-                  </Text>
-                </View>
-              </View>
+              {/* ---- Top: Cabezal ---- */}
+              <HDim
+                width={drawW}
+                label={`Cabezal: ${formatMeasure(results.cabezal)} cm`}
+                lineColor={lineColor}
+                textColor={dimColor}
+                bgColor={labelBg}
+              />
 
-              {/* ---- Middle: side labels + frame ---- */}
+              {/* ---- Middle: side dims + frame ---- */}
               <View style={styles.middle}>
-                {/* Left: Jamba dimension */}
-                <View style={[styles.vDim, { height: drawH }]}>  
-                  <View style={[styles.vDimLine, { backgroundColor: lineColor }]} />
-                  <View style={[styles.vDimCap, styles.vDimCapTop, { backgroundColor: lineColor }]} />
-                  <View style={[styles.vDimCap, styles.vDimCapBottom, { backgroundColor: lineColor }]} />
-                  <View style={styles.vDimLabel}>
-                    <Text style={[styles.dimTextSmall, { color: dimColor }]}>
-                      Jamba
-                    </Text>
-                    <Text style={[styles.dimText, { color: dimColor }]}>
-                      {formatMeasure(results.jamba)} cm
-                    </Text>
-                  </View>
-                </View>
+                {/* Left: Jamba */}
+                <VDim
+                  height={drawH}
+                  lines={[
+                    { label: 'Jamba', value: `${formatMeasure(results.jamba)} cm` },
+                  ]}
+                  lineColor={lineColor}
+                  textColor={dimColor}
+                  bgColor={labelBg}
+                />
 
                 {/* Window frame */}
                 <View
                   style={{
                     width: drawW,
                     height: drawH,
-                    borderWidth: frame,
+                    borderWidth: framePx,
                     borderColor: frameColor,
                     borderRadius: 2,
                   }}
@@ -170,15 +233,11 @@ export function WindowDiagram({
                           },
                         ]}
                       >
-                        <Text
-                          style={[styles.panelDim, { color: colors.textSecondary }]}
-                        >
+                        <Text style={[styles.panelDim, { color: colors.textSecondary }]}>
                           {formatMeasure(results.vidrio_ancho)} x{' '}
                           {formatMeasure(results.vidrio_alto)}
                         </Text>
-                        <Text
-                          style={[styles.panelName, { color: colors.textSecondary }]}
-                        >
+                        <Text style={[styles.panelName, { color: colors.textSecondary }]}>
                           Vidrio
                         </Text>
                       </View>
@@ -186,45 +245,49 @@ export function WindowDiagram({
                   </View>
                 </View>
 
-                {/* Right: total height */}
-                <View style={[styles.vDim, { height: drawH }]}>  
-                  <View style={[styles.vDimLine, { backgroundColor: lineColor }]} />
-                  <View style={[styles.vDimCap, styles.vDimCapTop, { backgroundColor: lineColor }]} />
-                  <View style={[styles.vDimCap, styles.vDimCapBottom, { backgroundColor: lineColor }]} />
-                  <View style={styles.vDimLabel}>
-                    <Text style={[styles.dimTextSmall, { color: dimColor }]}>
-                      Alto
-                    </Text>
-                    <Text style={[styles.dimText, { color: dimColor }]}>
-                      {windowHeight} cm
-                    </Text>
-                  </View>
-                </View>
+                {/* Right inner: Enganche + Traslape */}
+                <VDim
+                  height={drawH}
+                  lines={[
+                    { label: 'Enganche', value: `${formatMeasure(results.eganche)} cm` },
+                    { label: 'Traslape', value: `${formatMeasure(results.traslape)} cm` },
+                  ]}
+                  lineColor={lineColor}
+                  textColor={dimColor}
+                  bgColor={labelBg}
+                />
+
+                {/* Right outer: Alto total */}
+                <VDim
+                  height={drawH}
+                  lines={[
+                    { label: 'Alto', value: `${windowHeight} cm` },
+                  ]}
+                  lineColor={lineColor}
+                  textColor={dimColor}
+                  bgColor={labelBg}
+                />
               </View>
 
-              {/* ---- Bottom dimension: Sillar ---- */}
-              <View style={[styles.hDim, { width: drawW }]}>  
-                <View style={[styles.hDimLine, { backgroundColor: lineColor }]} />
-                <View style={[styles.hDimCap, styles.hDimCapLeft, { backgroundColor: lineColor }]} />
-                <View style={[styles.hDimCap, styles.hDimCapRight, { backgroundColor: lineColor }]} />
-                <View style={styles.hDimLabel}>
-                  <Text style={[styles.dimText, { color: dimColor }]}>
-                    Sillar: {formatMeasure(results.sillar)} cm
-                  </Text>
-                </View>
-              </View>
+              {/* ---- Bottom: Sillar ---- */}
+              <HDim
+                width={drawW}
+                label={`Sillar: ${formatMeasure(results.sillar)} cm`}
+                lineColor={lineColor}
+                textColor={dimColor}
+                bgColor={labelBg}
+              />
 
-              {/* ---- Horizontal piece dimension ---- */}
-              <View style={[styles.hDim, { width: drawW * 0.5, marginTop: 4 }]}>  
-                <View style={[styles.hDimLine, { backgroundColor: lineColor, opacity: 0.5 }]} />
-                <View style={[styles.hDimCap, styles.hDimCapLeft, { backgroundColor: lineColor, opacity: 0.5 }]} />
-                <View style={[styles.hDimCap, styles.hDimCapRight, { backgroundColor: lineColor, opacity: 0.5 }]} />
-                <View style={styles.hDimLabel}>
-                  <Text style={[styles.dimTextSmall, { color: dimColor, opacity: 0.7 }]}>
-                    Horizontal: {formatMeasure(results.horizontal)} cm
-                  </Text>
-                </View>
-              </View>
+              {/* ---- Horizontal: one panel width ---- */}
+              <HDim
+                width={panelW + framePx}
+                label={`Horizontal: ${formatMeasure(results.horizontal)} cm`}
+                lineColor={lineColor}
+                textColor={dimColor}
+                bgColor={labelBg}
+                style={{ alignSelf: 'flex-start', marginLeft: dimColW }}
+                opacity={0.7}
+              />
             </View>
           </Animated.View>
         </GestureDetector>
@@ -254,7 +317,7 @@ const styles = StyleSheet.create({
   },
   clipArea: {
     overflow: 'hidden',
-    minHeight: 300,
+    minHeight: 340,
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: 20,
@@ -267,7 +330,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // -- Panels inside the frame --
+  // -- Middle row --
+  middle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  // -- Panels --
   panelsRow: {
     flex: 1,
     flexDirection: 'row',
@@ -289,82 +358,76 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // -- Middle row: side dims + frame --
-  middle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  // -- Horizontal dimension line --
+  // -- Horizontal dimension --
   hDim: {
-    height: 22,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 2,
+    marginVertical: 3,
   },
-  hDimLine: {
+  hLine: {
     position: 'absolute',
     left: 0,
     right: 0,
     height: 1,
-    top: 10,
+    top: 11,
   },
-  hDimCap: {
+  hCap: {
     position: 'absolute',
     width: 1,
     height: 8,
-    top: 7,
+    top: 8,
   },
-  hDimCapLeft: {
-    left: 0,
-  },
-  hDimCapRight: {
-    right: 0,
-  },
-  hDimLabel: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 4,
+  hCapL: { left: 0 },
+  hCapR: { right: 0 },
+  hLabel: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 3,
     zIndex: 1,
   },
 
-  // -- Vertical dimension line --
+  // -- Vertical dimension --
   vDim: {
-    width: 44,
+    width: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  vDimLine: {
+  vLine: {
     position: 'absolute',
     top: 0,
     bottom: 0,
     width: 1,
-    left: 21,
+    left: 19,
   },
-  vDimCap: {
+  vCap: {
     position: 'absolute',
     height: 1,
     width: 8,
-    left: 18,
+    left: 16,
   },
-  vDimCapTop: {
-    top: 0,
-  },
-  vDimCapBottom: {
-    bottom: 0,
-  },
-  vDimLabel: {
+  vCapT: { top: 0 },
+  vCapB: { bottom: 0 },
+  vLabel: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    paddingVertical: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+    borderRadius: 3,
     zIndex: 1,
   },
-
-  dimText: {
-    fontSize: 11,
-    fontWeight: '600',
+  vLabelGap: {
+    marginTop: 6,
   },
-  dimTextSmall: {
-    fontSize: 9,
+
+  // -- Text --
+  dimText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  dimSub: {
+    fontSize: 8,
     fontWeight: '500',
+    textAlign: 'center',
   },
 });
