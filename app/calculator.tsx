@@ -68,7 +68,12 @@ export default function CalculatorScreen() {
             />
 
             {results ? (
-              <ResultsList results={results} width={width} height={height} />
+              <ResultsList
+                results={results}
+                width={width}
+                height={height}
+                systemName={systemDef?.name ?? ''}
+              />
             ) : (
               <View
                 style={[
