@@ -35,8 +35,8 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen
-              name="index"
-              options={{ title: 'Cortes Aluminio' }}
+              name="(tabs)"
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="calculator"
