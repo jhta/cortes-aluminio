@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Share } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Share, Linking, Platform } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '@/src/hooks/useTheme';
 import {
@@ -6,6 +6,8 @@ import {
   formatMeasure,
   type SystemResult,
 } from '@/src/utils/calculations';
+
+const WHATSAPP_GREEN = '#25D366';
 
 interface ResultsListProps {
   results: SystemResult;
@@ -17,12 +19,12 @@ interface ResultsListProps {
 export function ResultsList({ results, width, height, systemName }: ResultsListProps) {
   const { colors } = useTheme();
 
-  const handleShare = async () => {
+  const buildMessage = () => {
     const lines = Object.entries(results).map(
       ([key, value]) => `  ${capitalize(key)}: ${formatMeasure(value)} cm`,
     );
 
-    const message = [
+    return [
       `*Cortes Aluminio*`,
       `*${systemName}*`,
       `Ventana: ${width} x ${height} cm`,
@@ -30,11 +32,22 @@ export function ResultsList({ results, width, height, systemName }: ResultsListP
       `*Medidas:*`,
       ...lines,
     ].join('\n');
+  };
+
+  const handleShareWhatsApp = async () => {
+    const message = buildMessage();
+    const encoded = encodeURIComponent(message);
+    const url = `whatsapp://send?text=${encoded}`;
 
     try {
-      await Share.share({ message });
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        await Share.share({ message });
+      }
     } catch {
-      // user cancelled
+      await Share.share({ message });
     }
   };
 
@@ -55,17 +68,6 @@ export function ResultsList({ results, width, height, systemName }: ResultsListP
             Ventana {width} x {height} cm
           </Text>
         </View>
-        <Pressable
-          onPress={handleShare}
-          style={({ pressed }) => [
-            styles.shareButton,
-            {
-              backgroundColor: pressed ? colors.border : 'transparent',
-            },
-          ]}
-        >
-          <Ionicons name="share-outline" size={22} color={colors.tint} />
-        </Pressable>
       </View>
 
       <View>
@@ -83,6 +85,17 @@ export function ResultsList({ results, width, height, systemName }: ResultsListP
           </View>
         ))}
       </View>
+
+      <Pressable
+        onPress={handleShareWhatsApp}
+        style={({ pressed }) => [
+          styles.whatsappButton,
+          { opacity: pressed ? 0.85 : 1 },
+        ]}
+      >
+        <Ionicons name="logo-whatsapp" size={22} color="#fff" />
+        <Text style={styles.whatsappButtonText}>Compartir en WhatsApp</Text>
+      </Pressable>
     </View>
   );
 }
@@ -111,10 +124,20 @@ const styles = StyleSheet.create({
   summary: {
     fontSize: 14,
   },
-  shareButton: {
-    padding: 8,
-    borderRadius: 8,
-    marginLeft: 8,
+  whatsappButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 18,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: WHATSAPP_GREEN,
+  },
+  whatsappButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
   row: {
     flexDirection: 'row',

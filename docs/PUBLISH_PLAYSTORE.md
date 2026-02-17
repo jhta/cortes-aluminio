@@ -1,35 +1,35 @@
-# Publicar Cortes Aluminio en Google Play Store
+# Publishing Cortes Aluminio to Google Play Store
 
-Guia paso a paso para publicar la app usando Expo EAS.
-
----
-
-## Requisitos previos
-
-- [ ] **Cuenta de Google Play Developer** — $25 USD (pago unico): https://play.google.com/console
-  - La verificacion de cuenta puede tardar 24-48 horas
-- [ ] **Cuenta de Expo** — gratis: https://expo.dev/signup
-- [ ] **Node.js** instalado (ya lo tienes)
+Step-by-step guide using Expo EAS.
 
 ---
 
-## Paso 1: Instalar EAS CLI
+## Prerequisites
+
+- [ ] **Google Play Developer account** — $25 USD one-time fee: https://play.google.com/console
+  - Account verification can take 24-48 hours
+- [ ] **Expo account** — free: https://expo.dev/signup
+- [ ] **Node.js** installed (you already have it)
+
+---
+
+## Step 1: Install EAS CLI
 
 ```bash
 npm install -g eas-cli
 ```
 
-## Paso 2: Login en Expo
+## Step 2: Login to Expo
 
 ```bash
 eas login
 ```
 
-Usa tu cuenta de Expo. Si no tienes una, creala en https://expo.dev/signup
+Use your Expo account. If you don't have one, create it at https://expo.dev/signup
 
-## Paso 3: Configurar el package name de Android
+## Step 3: Set the Android package name
 
-Editar `app.json` y agregar el `package` dentro de `android`:
+Edit `app.json` and add `package` inside `android`:
 
 ```json
 "android": {
@@ -40,143 +40,197 @@ Editar `app.json` y agregar el `package` dentro de `android`:
 }
 ```
 
-> El package name debe ser unico en Play Store. Formato: `com.tunombre.tuapp`
+> The package name must be unique on Play Store. Format: `com.yourname.yourapp`
 
-## Paso 4: Configurar EAS Build
+## Step 4: Configure EAS Build
 
 ```bash
 cd /Users/jeisonhiguita/Documents/side-projects/cortes-aluminio
 eas build:configure
 ```
 
-Esto crea un archivo `eas.json` con los perfiles de build (development, preview, production).
+This creates an `eas.json` file with build profiles (development, preview, production).
 
-## Paso 5: Crear el build de produccion
+## Step 5: Create the production build
 
 ```bash
 eas build --platform android --profile production
 ```
 
-- Se ejecuta en la nube (no necesitas Android Studio)
-- Tarda ~10-15 minutos la primera vez
-- Genera un archivo `.aab` (Android App Bundle)
-- EAS te pedira crear un keystore la primera vez — acepta, lo guarda en la nube
+- Runs in the cloud (no Android Studio needed)
+- Takes ~10-15 minutes the first time
+- Generates an `.aab` file (Android App Bundle)
+- EAS will ask to create a keystore the first time — accept it, it's stored securely in the cloud
 
-Al terminar te da un link para descargar el `.aab`.
+When done, you'll get a download link for the `.aab`.
 
-## Paso 6: Crear la app en Google Play Console
+## Step 6: Create the app in Google Play Console
 
-1. Ir a https://play.google.com/console
-2. Click **"Crear aplicacion"**
-3. Llenar:
-   - Nombre: **Cortes Aluminio**
-   - Idioma: Espanol
-   - Tipo: Aplicacion
-   - Gratuita
-4. Aceptar las declaraciones
+1. Go to https://play.google.com/console
+2. Click **"Create app"**
+3. Fill in:
+   - Name: **Cortes Aluminio**
+   - Language: Spanish
+   - Type: App
+   - Free
+4. Accept the declarations
 
-## Paso 7: Completar la ficha de Play Store
+## Step 7: Complete the Play Store listing
 
-Antes de publicar, Google requiere completar:
+Before publishing, Google requires:
 
-### Informacion basica
-- **Descripcion corta**: "Calculadora de cortes de aluminio para ventanas"
-- **Descripcion larga**: "Calcula las medidas exactas de cada pieza de aluminio para construir ventanas. Soporta sistemas 520 y 744. Ingresa ancho, alto y numero de alas para obtener las dimensiones de cabezal, sillar, jamba, horizontal, enganche, traslape y vidrio."
+### Basic info
+- **Short description**: "Aluminum cutting calculator for windows"
+- **Long description**: "Calculate the exact dimensions of each aluminum piece needed to build windows. Supports systems 520 and 744. Enter width, height, and number of panels to get dimensions for cabezal, sillar, jamba, horizontal, enganche, traslape, and glass."
 
-### Capturas de pantalla
-- Necesitas minimo 2 capturas de pantalla del telefono
-- Puedes tomarlas del emulador o tu celular
-- Formato: JPEG o PNG, minimo 320px, maximo 3840px
+### Screenshots
+- Minimum 2 phone screenshots
+- You can take them from the emulator or your phone
+- Format: JPEG or PNG, min 320px, max 3840px
 
-### Icono de la app
-- 512 x 512 px, PNG de alta resolucion
+### App icon
+- 512 x 512 px, high-resolution PNG
 
-### Clasificacion de contenido
-- Ir a **Politica > Clasificacion de contenido**
-- Completar el cuestionario (es rapido, la app no tiene contenido sensible)
+### Content rating
+- Go to **Policy > Content rating**
+- Complete the questionnaire (quick, the app has no sensitive content)
 
-### Politica de privacidad
-- Google requiere una URL de politica de privacidad
-- Opcion rapida: crear una pagina simple en GitHub Pages o usar un generador como https://app-privacy-policy-generator.firebaseapp.com/
-- Como la app no recopila datos, la politica es muy simple
+### Privacy policy
+- Google requires a privacy policy URL
+- Quick option: create a simple page on GitHub Pages or use a generator like https://app-privacy-policy-generator.firebaseapp.com/
+- Since the app collects no data, the policy is very simple
 
-## Paso 8: Subir el build
+## Step 8: Upload the build
 
-### Opcion A: Con EAS Submit (automatico)
+### Option A: With EAS Submit (automated)
 
-Primero necesitas crear una **Service Account Key** de Google:
+First, create a **Google Service Account Key**:
 
-1. En Play Console: **Configuracion > Acceso a API**
-2. Crear una cuenta de servicio
-3. Descargar el archivo JSON
-4. Guardar el JSON en un lugar seguro (NO en el repo)
+1. In Play Console: **Settings > API access**
+2. Create a service account
+3. Download the JSON file
+4. Store the JSON securely (NOT in the repo)
 
-Luego:
+Then:
 
 ```bash
-eas submit --platform android --path /ruta/al/archivo.aab
+eas submit --platform android --path /path/to/file.aab
 ```
 
-O si el build ya esta en EAS:
+Or if the build is already on EAS:
 
 ```bash
 eas submit --platform android --latest
 ```
 
-Te pedira la ruta al JSON de la service account.
+It will ask for the path to the service account JSON.
 
-### Opcion B: Manual (mas simple la primera vez)
+### Option B: Manual upload (simpler for the first time)
 
-1. Descargar el `.aab` del link que te dio `eas build`
-2. En Play Console, ir a **Produccion > Crear nueva version**
-3. Subir el `.aab` manualmente
-4. Agregar notas de la version: "Version inicial"
-5. Click **Revisar version** y luego **Iniciar lanzamiento**
+1. Download the `.aab` from the link provided by `eas build`
+2. In Play Console, go to **Production > Create new release**
+3. Upload the `.aab` manually
+4. Add release notes: "Initial release"
+5. Click **Review release** then **Start rollout**
 
-## Paso 9: Publicar
+## Step 9: Publish
 
-### Recomendacion: empezar con testing interno
+### Recommended: start with internal testing
 
-1. En Play Console: **Pruebas > Pruebas internas**
-2. Subir el `.aab`
-3. Agregar emails de testers (hasta 100)
-4. Los testers reciben un link para instalar
-5. Disponible en minutos (sin revision de Google)
+1. In Play Console: **Testing > Internal testing**
+2. Upload the `.aab`
+3. Add tester emails (up to 100)
+4. Testers receive an install link
+5. Available in minutes (no Google review)
 
-### Produccion
+### Production
 
-1. Cuando estes listo, promueve de testing interno a produccion
-2. Google revisa la app (puede tardar 1-7 dias la primera vez)
-3. Una vez aprobada, aparece en Play Store
+1. When ready, promote from internal testing to production
+2. Google reviews the app (can take 1-7 days the first time)
+3. Once approved, it appears on Play Store
 
 ---
 
-## Actualizaciones futuras
+## Quick install on a connected device (no Play Store)
 
-Para publicar una nueva version:
+You can build locally and install directly on a connected Android phone.
 
-1. Incrementar `version` en `app.json` (ej: "1.0.0" -> "1.1.0")
-2. Crear nuevo build:
+### Option 1: Local APK with EAS (easiest)
+
+Build a preview APK (installs directly, no Play Store needed):
+
+```bash
+eas build --platform android --profile preview --local
+```
+
+> Note: `--local` requires Java 17 and Android SDK installed locally.
+> Install them with: `brew install openjdk@17` and Android Studio or `sdkmanager`.
+
+This produces an `.apk` file. Install it on your connected device:
+
+```bash
+adb install build-*.apk
+```
+
+### Option 2: Development build on device
+
+This gives you a hot-reloading dev build on your phone:
+
+```bash
+# Create a development build
+npx expo run:android
+```
+
+> Requires Android SDK. Your phone must have **USB debugging** enabled
+> (Settings > Developer options > USB debugging).
+
+The app installs and runs on your connected device with live reload.
+
+### Option 3: Expo Go (quickest for testing, no build needed)
+
+```bash
+npx expo start
+```
+
+Scan the QR code with the **Expo Go** app on your phone (available on Play Store).
+This runs instantly but doesn't support all native features.
+
+### Enable USB debugging on your Android phone
+
+1. Go to **Settings > About phone**
+2. Tap **Build number** 7 times (enables Developer options)
+3. Go to **Settings > Developer options**
+4. Enable **USB debugging**
+5. Connect phone via USB and accept the prompt
+
+---
+
+## Future updates
+
+To publish a new version:
+
+1. Increment `version` in `app.json` (e.g. "1.0.0" -> "1.1.0")
+2. Build:
    ```bash
    eas build --platform android --profile production
    ```
-3. Subir:
+3. Upload:
    ```bash
    eas submit --platform android --latest
    ```
 
 ---
 
-## Checklist final
+## Final checklist
 
-- [ ] Cuenta Google Play Developer activa
-- [ ] Cuenta Expo creada y logueada
-- [ ] `android.package` configurado en `app.json`
-- [ ] `eas build:configure` ejecutado
-- [ ] Build de produccion creado con `eas build`
-- [ ] App creada en Play Console
-- [ ] Descripcion, capturas, icono subidos
-- [ ] Clasificacion de contenido completada
-- [ ] Politica de privacidad publicada y URL agregada
-- [ ] `.aab` subido a Play Console
-- [ ] Version enviada a revision
+- [ ] Google Play Developer account active
+- [ ] Expo account created and logged in
+- [ ] `android.package` set in `app.json`
+- [ ] `eas build:configure` executed
+- [ ] Production build created with `eas build`
+- [ ] App created in Play Console
+- [ ] Description, screenshots, icon uploaded
+- [ ] Content rating completed
+- [ ] Privacy policy published and URL added
+- [ ] `.aab` uploaded to Play Console
+- [ ] Release submitted for review
