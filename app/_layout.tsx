@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { Colors } from '@/src/constants/theme';
@@ -25,24 +26,26 @@ export default function RootLayout() {
   };
 
   return (
-    <ThemeContext.Provider value={{ colors, isDark }}>
-      <ThemeProvider value={navTheme}>
-        <Stack
-          screenOptions={{
-            headerTintColor: colors.tint,
-          }}
-        >
-          <Stack.Screen
-            name="index"
-            options={{ title: 'Cortes Aluminio' }}
-          />
-          <Stack.Screen
-            name="calculator"
-            options={{ title: 'Calculadora' }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </ThemeContext.Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeContext.Provider value={{ colors, isDark }}>
+        <ThemeProvider value={navTheme}>
+          <Stack
+            screenOptions={{
+              headerTintColor: colors.tint,
+            }}
+          >
+            <Stack.Screen
+              name="index"
+              options={{ title: 'Cortes Aluminio' }}
+            />
+            <Stack.Screen
+              name="calculator"
+              options={{ title: 'Calculadora' }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ThemeContext.Provider>
+    </GestureHandlerRootView>
   );
 }

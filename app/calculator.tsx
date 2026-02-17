@@ -13,6 +13,7 @@ import { useTheme } from '@/src/hooks/useTheme';
 import { InputField } from '@/src/components/InputField';
 import { PanelSelector } from '@/src/components/PanelSelector';
 import { ResultsList } from '@/src/components/ResultsList';
+import { WindowDiagram } from '@/src/components/WindowDiagram';
 import { systemDefinitions } from '@/src/constants/systems';
 import { calculate } from '@/src/utils/calculations';
 
@@ -68,12 +69,20 @@ export default function CalculatorScreen() {
             />
 
             {results ? (
-              <ResultsList
-                results={results}
-                width={width}
-                height={height}
-                systemName={systemDef?.name ?? ''}
-              />
+              <>
+                <WindowDiagram
+                  results={results}
+                  windowWidth={parseFloat(width) || 0}
+                  windowHeight={parseFloat(height) || 0}
+                  alas={alas}
+                />
+                <ResultsList
+                  results={results}
+                  width={width}
+                  height={height}
+                  systemName={systemDef?.name ?? ''}
+                />
+              </>
             ) : (
               <View
                 style={[
