@@ -1,25 +1,25 @@
-import { useState, useMemo } from 'react';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { useMemo, useState } from 'react';
 import {
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { useTheme } from '@/src/hooks/useTheme';
 import { InputField } from '@/src/components/InputField';
 import { PanelSelector } from '@/src/components/PanelSelector';
 import { ResultsList } from '@/src/components/ResultsList';
-import { WindowDiagram } from '@/src/components/WindowDiagram';
 import { SaveModal } from '@/src/components/SaveModal';
+import { WindowDiagram } from '@/src/components/WindowDiagram';
 import { systemDefinitions } from '@/src/constants/systems';
-import { calculate } from '@/src/utils/calculations';
+import { useTheme } from '@/src/hooks/useTheme';
 import { historyStorage } from '@/src/storage/history';
+import { calculate } from '@/src/utils/calculations';
 
 const ALAS_OPTIONS = [2, 3, 4];
 
@@ -32,7 +32,6 @@ export default function CalculatorScreen() {
   const [height, setHeight] = useState(paramHeight ?? '');
   const [alas, setAlas] = useState(2);
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   const systemDef = systemDefinitions.find((s) => s.id === system);
 
@@ -53,8 +52,8 @@ export default function CalculatorScreen() {
       results,
     });
     setShowSaveModal(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    router.back();
+    setTimeout(() => router.push('/(tabs)/history'), 100);
   };
 
   return (
@@ -104,32 +103,6 @@ export default function CalculatorScreen() {
                   height={height}
                   systemName={systemDef?.name ?? ''}
                 />
-
-                <Pressable
-                  onPress={() => setShowSaveModal(true)}
-                  style={({ pressed }) => [
-                    styles.saveButton,
-                    {
-                      backgroundColor: saved ? '#22C55E' : colors.tint,
-                      opacity: pressed ? 0.85 : 1,
-                    },
-                  ]}
-                  disabled={saved}
-                >
-                  <Ionicons
-                    name={saved ? 'checkmark-circle' : 'save-outline'}
-                    size={22}
-                    color={saved ? '#fff' : colors.tintText}
-                  />
-                  <Text
-                    style={[
-                      styles.saveButtonText,
-                      { color: saved ? '#fff' : colors.tintText },
-                    ]}
-                  >
-                    {saved ? 'Guardado' : 'Guardar'}
-                  </Text>
-                </Pressable>
               </>
             ) : (
               <View
@@ -148,6 +121,26 @@ export default function CalculatorScreen() {
             )}
           </View>
         </ScrollView>
+
+        {results && (
+          <View style={[styles.saveBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+            <Pressable
+              onPress={() => setShowSaveModal(true)}
+              style={({ pressed }) => [
+                styles.saveButton,
+                {
+                  backgroundColor: colors.tint,
+                  opacity: pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              <Ionicons name="save-outline" size={22} color={colors.tintText} />
+              <Text style={[styles.saveButtonText, { color: colors.tintText }]}>
+                Guardar
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </KeyboardAvoidingView>
 
       <SaveModal
@@ -165,6 +158,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 80,
   },
   container: {
     flex: 1,
@@ -177,12 +171,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
+  saveBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    marginTop: 14,
     paddingVertical: 14,
     borderRadius: 12,
   },

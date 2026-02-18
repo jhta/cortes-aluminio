@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.cortesaluminio"
+      "package": "com.jhta.cortesaluminio"
     },
     "web": {
       "output": "static",
@@ -44,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aee783e8-d18e-4207-8baf-af5f0bfef751"
+      }
     }
   }
 }

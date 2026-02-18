@@ -80,8 +80,8 @@ When done, you'll get a download link for the `.aab`.
 Before publishing, Google requires:
 
 ### Basic info
-- **Short description**: "Aluminum cutting calculator for windows"
-- **Long description**: "Calculate the exact dimensions of each aluminum piece needed to build windows. Supports systems 520 and 744. Enter width, height, and number of panels to get dimensions for cabezal, sillar, jamba, horizontal, enganche, traslape, and glass."
+- **Short description**: "Calculadora de cortes de aluminio para ventanas"
+- **Long description**: "Calcula las dimensiones exactas de cada pieza de aluminio necesaria para construir ventanas. Soporta sistemas 520 y 744. Ingresa ancho, alto y número de paneles para obtener las medidas de cabezal, sillar, jamba, horizontal, enganche, traslape y vidrio."
 
 ### Screenshots
 - Minimum 2 phone screenshots
